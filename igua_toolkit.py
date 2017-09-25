@@ -5,6 +5,7 @@
 # how to set to autostart:
 # sudo nano etc/profile
 # comment or uncomment python line
+# solo un comentario para agregar un cambio a git
 
 #importando modulos genericos
 from time import sleep
