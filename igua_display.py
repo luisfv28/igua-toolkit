@@ -13,7 +13,7 @@ fontsize2 = 48
 
 def startdisplay():
 	pygame.init()
-	pygame.display.set_caption('IGUA - delajalafluir')
+	pygame.display.set_caption('IGUA')
 	
 	
 def display_bienvenida_linear(now):
