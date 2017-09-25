@@ -1,4 +1,3 @@
 # The IGUA toolkit
 This is the igua toolkit : )
-An open source project to help us get reliable water for everyne, averywhere, anytime.
-
+An open source project to help us get reliable water for everyone, everywhere, anytime.
