@@ -119,33 +119,33 @@ client_carriots = Client(apikey)
 #para lcd
 def lcd_bienvenida_linear(now):
 	if  now == 0:
-		ser3.write('agua pura!         toma igua!!! '.encode())
+		ser3.write('agua pura!      toma igua!!!    '.encode())
 	elif now == 1:
-		ser3.write('hola mundo!!!      hola igua!!! '.encode())
+		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
 	elif now == 2:
-		ser3.write('chauuuuuuu!!!      hola igua!!! '.encode())
+		ser3.write('chauuuuuuu!!!   hola igua!!!    '.encode())
 	elif now == 3:
-		ser3.write('hola mundo!!!      hola igua!!! '.encode())
+		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
 	elif now == 4:
-		ser3.write('chauuuuuuu!!!      hola igua!!! '.encode())
+		ser3.write('chauuuuuuu!!!   hola igua!!!    '.encode())
 	elif now == 5:
-		ser3.write('hola mundo!!!      hola igua!!! '.encode())
+		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
 	
 	return 1
 
 def lcd_bienvenida_pwyw(now):
 	if  now == 0:
-		ser3.write('agua pura!         toma igua!!! '.encode())
+		ser3.write('agua pura!      toma igua!!!    '.encode())
 	elif now == 1:
-		ser3.write('hola mundo!!!      hola igua!!! '.encode())
+		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
 	elif now == 2:
-		ser3.write('chauuuuuuu!!!      hola igua!!! '.encode())
+		ser3.write('chauuuuuuu!!!   hola igua!!!    '.encode())
 	elif now == 3:
-		ser3.write('hola mundo!!!      hola igua!!! '.encode())
+		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
 	elif now == 4:
-		ser3.write('chauuuuuuu!!!      hola igua!!! '.encode())
+		ser3.write('chauuuuuuu!!!   hola igua!!!    '.encode())
 	elif now == 5:
-		ser3.write('hola mundo!!!      hola igua!!! '.encode())
+		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
 	
 	return 1
 
