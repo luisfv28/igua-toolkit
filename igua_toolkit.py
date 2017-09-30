@@ -1,11 +1,17 @@
-#!/usr/bin/python import os
+#!/usr/bin/python3 import os
 
 # sleep(15)
 
 # how to set to autostart:
-# sudo nano etc/profile
-# comment or uncomment python line
-# solo un comentario para agregar un cambio a git
+# lo mismo pero adaptado a raspi: https://www.raspberrypi-spy.co.uk/2014/05/how-to-autostart-apps-in-rasbian-lxde-desktop/
+# lo que funcó para hacer autostart: editamos este file: 
+# sudo nano ~/.config/lxsession/LXDE-pi/autostart
+# y alli adentro ponemos lo sgte: 
+# @sudo /home/pi/Desktop/igua-toolkit/run.sh
+# notar que debes escribilo antes de la linea que dice "screensaver"
+# luego conviene crear un bookmark en el filemanager (pcmanfm) a la carpeta .config/lxsession/LXDE-pi/
+
+
 
 #importando modulos genericos
 from time import sleep
