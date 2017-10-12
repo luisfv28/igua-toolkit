@@ -13,12 +13,18 @@
 
 
 
+
+
+
+
 #importando modulos genericos
 from time import sleep
 from time import strftime 
 import time
 import serial
 import re
+import socket
+REMOTE_SERVER = "www.google.com"
 
 # configuaracion de entradas/saldas del RPI
 import RPi.GPIO as GPIO
@@ -79,7 +85,18 @@ def rc_time(pipin):
     return measurement
     
     
-#fin para carriots 
+#fin para carriots
+
+# para validar conexion disponible
+
+def is_connected():
+    try:
+        host = socket.gethostbyname(REMOTE_SERVER)
+        s = socket.create_connection((host, 80), 2)
+        return True
+    except:
+        pass
+    return False
 
 ser = serial.Serial('/dev/ttyACM0',9600,timeout = 0)
 ser2 =  serial.Serial('/dev/ttyACM2',9600,timeout = None)
@@ -314,8 +331,13 @@ while 1 == 1:
 				timestamp = int(mktime(datetime.utcnow().timetuple()))
 				solesstring = str(solesacumulados)
 				data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f')}}
-				carriots_response = client_carriots.send(data)
-				print(carriots_response.read())
+				if is_connected() == True:
+					carriots_response = client_carriots.send(data)
+					print('conexion ok!')
+					print(carriots_response.read())
+				else:
+					print('no connectivity available')
+					
 				#fin bloque carriots 
 				process_id = 3
 					
@@ -330,9 +352,14 @@ while 1 == 1:
 				#send collected data to carriots
 				timestamp = int(mktime(datetime.utcnow().timetuple()))
 				solesstring = str(solesacumulados)
-				data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f')}} 
-				carriots_response = client_carriots.send(data)
-				print(carriots_response.read())
+				data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f')}}
+				
+				if is_connected() == True:
+					carriots_response = client_carriots.send(data)
+					print('conexion ok!')
+					print(carriots_response.read())
+				else:
+					print('no esta conectado al internet : ( ')
 				#fin bloque carriots 
 				process_id = 3
 				
