@@ -11,6 +11,12 @@
 # notar que debes escribilo antes de la linea que dice "screensaver"
 # luego conviene crear un bookmark en el filemanager (pcmanfm) a la carpeta .config/lxsession/LXDE-pi/
 
+# para configurar qué redes queremos aprender u olvidar: 
+# sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+
+# para clonar la carpeta de github a local:
+# git clone http://github.com/kikomayorga/igua_toolkit/
+
 
 #importando modulos genericos
 from time import sleep
