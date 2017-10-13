@@ -12,11 +12,6 @@
 # luego conviene crear un bookmark en el filemanager (pcmanfm) a la carpeta .config/lxsession/LXDE-pi/
 
 
-
-
-
-
-
 #importando modulos genericos
 from time import sleep
 from time import strftime 
@@ -53,6 +48,7 @@ from json import dumps
 
 class Client (object):
     api_url = "http://api.carriots.com/streams"
+    api_read_url = "http://api.carriots.com/streams/IGUA01@kikomayorga.kikomayorga/"
 
     def __init__(self, api_key=None, client_type='json'):
         self.client_type = client_type
@@ -87,7 +83,8 @@ def rc_time(pipin):
     
 #fin para carriots
 
-# para validar conexion disponible
+# declaramos una función que la usaremos mas adelante para 
+# validar conexion disponible
 
 def is_connected():
     try:
@@ -136,7 +133,13 @@ startdisplay()
 device = "IGUA01@kikomayorga.kikomayorga"  # Replace with the id_developer of your device
 apikey = "13f622d642b12cc336fa6bfde36e1561c6ac7eea19bd88d7c32246d0fca45691"  # Replace with your Carriots apikey
 client_carriots = Client(apikey)
+
+# ejemplo de curl "para traer todos los ulktimos streams"
+# curl --header carriots.apikey:13f622d642b12cc336fa6bfde36e1561c6ac7eea19bd88d7c32246d0fca45691 http://api.carriots.com/streams/?device=IGUA01@kikomayorga.kikomayorga
+
 #para carriots
+
+
 
 
 #para lcd
