@@ -136,7 +136,13 @@ startdisplay()
 #main loop
 
 #para carriots
-device = "IGUA01@kikomayorga.kikomayorga"  # Replace with the id_developer of your device
+# device = "IGUA01@kikomayorga.kikomayorga"  # Replace with the id_developer of your device
+device = "IGUA_FEST_1@kikomayorga.kikomayorga"
+# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
+# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
+# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
+# device = "IGUA_FEST_CHANCHA@kikomayorga.kikomayorga"
+# device = "IGUA_FEST_DMD@kikomayorga.kikomayorga"  
 apikey = "13f622d642b12cc336fa6bfde36e1561c6ac7eea19bd88d7c32246d0fca45691"  # Replace with your Carriots apikey
 client_carriots = Client(apikey)
 
