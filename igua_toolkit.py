@@ -136,8 +136,8 @@ startdisplay()
 #main loop
 
 #para carriots
-# device = "IGUA01@kikomayorga.kikomayorga"  # Replace with the id_developer of your device
-device = "IGUA_FEST_1@kikomayorga.kikomayorga"
+device = "IGUA01@kikomayorga.kikomayorga"  # Replace with the id_developer of your device
+# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
 # device = "IGUA_FEST_1@kikomayorga.kikomayorga"
 # device = "IGUA_FEST_1@kikomayorga.kikomayorga"
 # device = "IGUA_FEST_1@kikomayorga.kikomayorga"
