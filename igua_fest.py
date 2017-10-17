@@ -203,7 +203,16 @@ def lcd_acumula_pwyw(solesacumulados):
 	
 def lcd_servidos_lt(servidos_lt,diff):
 	# ser3.write(('mAs agua pura!  mAs agua pura!  ' + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!').encode())	
-	ser3.write(('mAs agua pura!  mAs agua pura!  ').encode())    # + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!'))	
+	# ser3.write(('mAs agua pura!  mAs agua pura!  ').encode())    # + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!'))	
+	ser3.write(('  + ' + str(format(servidos_lt/1000, '.3f')) + ' litros! ').encode())	
+
+def lcd_ahorradas_bot(ahorradas_bot,diff):
+	# ser3.write(('mAs agua pura!  mAs agua pura!  ' + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!').encode())	
+	# ser3.write(('mAs agua pura!  mAs agua pura!  ').encode())    # + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!'))	
+	ser3.write(('  - ' + str(format(ahorradas_bot/1000, '.0f')) + ' botellas! ').encode())	
+	
+		
+	# ser3.write(('QWERTYUIASDFGHJKL').encode())    # + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!'))	
 	# msgSurfaceObj = fontObj.render('te quedan: ' + format(servidos_lt/1000, '.3f') + ' litros!', False,whiteColor)
 	# msgSurfaceObj = fontObj.render('te quedan: ' + format(servidos_lt/1000, '.3f') + ' litros!', False,whiteColor)
 	# msgSurfaceObj2 = fontObj2.render('aun tienes: ' + format(diff) + ' segs. ', False,whiteColor)
@@ -214,7 +223,10 @@ def lcd_agradece():
 
 
 servidos_lt = 0
-	
+servidos_lt_old = 0
+servidos_litros_older = 0
+loopcounter = 0	
+servidos_total_old = 0
 		
 #para lcd
 	
@@ -250,14 +262,14 @@ while 1 == 1:
 	ser2.flushInput()
 	sleep(.1)
 	# servidos_lt = 0
+	servidos_push = 0
 	precio = 0.5
 	
 	secondcycle = 0 
 	
 	bytesToRead = ser2.inWaiting()
 	if bytesToRead > 0:
-			
-		sleep(0.2)
+		sleep(0.1)
 		diff = 0
 		bytesToRead = ser2.inWaiting()
 		# print("bytes to read on ser2: ", bytesToRead)
@@ -271,28 +283,35 @@ while 1 == 1:
 			secondcycle = 1  #flag que indica que ya se corrio una vuelta de inicializon
 			# print("bytes striped from ser2: ", string_igua)
 			servidos_total = int(string_igua)
-	
-			servidos_lt = 0.9 * ((servidos_total) * 2640)/2000
+			servidos_litros_older = servidos_lt_old
+			servidos_lt_old = servidos_lt
+			servidos_lt = 0.9 * ((servidos_total) * 2640)/(22*2000)
+			countstart_lt = 0.9 * ((countstart) * 2640)/(22*2000)
+			ahorradas_bot = servidos_lt / 0.75
 			diff = 10 - diff
-			display_servidos_lt((servidos_lt),diff)
-			lcd_servidos_lt((servidos_lt),diff)
-				
-		'''
-		if 1 == 1:
-			#send collected data to carriots
-			timestamp = int(mktime(datetime.utcnow().timetuple()))
-			timestamp = int(mktime(datetime.utcnow().timetuple()))
-			solesstring = str(solesacumulados)
-			data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f')}}
-			if is_connected() == True:
-				carriots_response = client_carriots.send(data)
-				print('conexion ok!')
-				print(carriots_response.read())
-			else:
-				print('no connectivity available')
-		'''
-		sleep(2)
-		print("una vuelta mas")
+			loopcounter = loopcounter + 1
+			if int(loopcounter/int(2))%3 == 0:
+				lcd_servidos_lt((servidos_lt),diff)
+				nada = 0
+			if int(loopcounter/int(2))%3 == 1:
+				lcd_ahorradas_bot(ahorradas_bot,diff)
+				nada = 0
+			if int(loopcounter/int(2))%3 == 2:
+				ser3.write('mAs agua pura!'.encode())
+				nada = 0
+			
+			if (servidos_lt_old == servidos_lt) and (servidos_litros_older != servidos_lt_old):
+				# servidos_servida = servidos_lt - servidos_lt_last
+				timestamp = int(mktime(datetime.utcnow().timetuple()))
+				data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f'), "maquina": "1"}}
+				if is_connected() == True:
+					carriots_response = client_carriots.send(data)
+					print('conexion ok!')
+					print(carriots_response.read())
+				else:
+					print('no connectivity available')
+
+			# print("una vuelta mas")
 					
 
 	# deshabilita vavula y agradece
