@@ -1,2 +1,2 @@
 #/bin/sh
-cd /home/pi/Desktop/igua-toolkit && sudo python3 igua_toolkit.py
+cd /home/pi/igua-toolkit && sudo python3 igua_fest.py

@@ -276,10 +276,14 @@ while 1 == 1:
 		string_igua = str(ser2.readline(),'utf-8')
 		# print("received on ser2: ", string_igua)
 		string_igua = string_igua.lstrip('r')
-		string_igua = string_igua.strip('/n/r')
-		string_igua = string_igua.strip('/r/n')		
+		string_igua = string_igua.strip('\n\r')
+		string_igua = string_igua.strip('\r\n')		
 		if secondcycle == 0:
-			countstart = int(string_igua)			
+			try:
+			    countstart = int(string_igua)
+			except ValueError:
+				print('error')
+							
 			secondcycle = 1  #flag que indica que ya se corrio una vuelta de inicializon
 			# print("bytes striped from ser2: ", string_igua)
 			servidos_total = int(string_igua)
@@ -303,7 +307,7 @@ while 1 == 1:
 			if (servidos_lt_old == servidos_lt) and (servidos_litros_older != servidos_lt_old):
 				# servidos_servida = servidos_lt - servidos_lt_last
 				timestamp = int(mktime(datetime.utcnow().timetuple()))
-				data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f'), "maquina": "1"}}
+				data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f'), "maquina": "2"}}
 				if is_connected() == True:
 					carriots_response = client_carriots.send(data)
 					print('conexion ok!')

@@ -3,7 +3,7 @@ import pygame, sys
 from pygame.locals import *
 # import datetime
 
-img = pygame.image.load('igua1.bmp')
+img = pygame.image.load('/home/pi/igua-toolkit/igua1.bmp')
 #variables del display
 
 width = 1400
