@@ -188,37 +188,59 @@ def lcd_bienvenida_pwyw(now):
 	return 1
 
 def lcd_acumula_linear(solesacumulados):
-	# ser3.write('hola mundo!!!      hola igua!!! '.encode())	
 	ser3.write(('tu saldo: S/. ' + str(format(solesacumulados, '.2f'))).encode())
-	# msgSurfaceObj = fontObj.render('tu saldo: S/. ' + format(solesacumulados, '.2f'), False,whiteColor)
-	# msgSurfaceObj2 = fontObj2.render('deposita o sirvete ' + format(solesacumulados / 0.5, '.2f') + ' litros.', False,whiteColor)
 	return 1
 	
 def lcd_acumula_pwyw(solesacumulados):
-	# ser3.write('hola mundo!!!      hola igua!!! '.encode())	
-	# msgSurfaceObj = fontObj.render('tu aporte: S/. ' + format(solesacumulados, '.2f'), False,whiteColor)
 	ser3.write(('tu aporte: S/. ' + str(format(solesacumulados, '.2f'))).encode())	
-	# msgSurfaceObj2 = fontObj2.render('deposita mas o sirvete! ', False,whiteColor)	
-
-	
+		
 def lcd_servidos_lt(servidos_lt,diff):
 	ser3.write(('te quedan: ' + str(format(servidos_lt/1000, '.3f')) + ' litros!').encode())	
-	# msgSurfaceObj = fontObj.render('te quedan: ' + format(servidos_lt/1000, '.3f') + ' litros!', False,whiteColor)
-	# msgSurfaceObj = fontObj.render('te quedan: ' + format(servidos_lt/1000, '.3f') + ' litros!', False,whiteColor)
-	# msgSurfaceObj2 = fontObj2.render('aun tienes: ' + format(diff) + ' segs. ', False,whiteColor)
-
+	
 	
 def lcd_agradece():
 	ser3.write('gracias!!!! igua ague pe ! '.encode())	
 
+def inicializaGPIO():
+	set_valve(0)
+	set_UV(1)	
+	
+def set_valve(valor):
+	if valor == 0:
+		GPIO.output(valve_relay, 1)
+		GPIO.output(spritz_relay, 0)
+	if valor == 1:
+		GPIO.output(valve_relay, 0)
+		GPIO.output(spritz_relay, 1)
+		
+def set_UV(valor):
+	if valor == 0:
+		GPIO.output(UV_relay, 1)
+	if valor == 1:
+		GPIO.output(UV_relay, 0)
 	
 		
-#para lcd
-	
+def send_to_carriots():  #send collected data to carriots
+	global device
+	global servidolitros
+	global solesacumulados
+	timestamp = int(mktime(datetime.utcnow().timetuple()))
+	timestamp = int(mktime(datetime.utcnow().timetuple()))
+	solesstring = str(solesacumulados)
+	data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f')}}
+	if is_connected() == True:
+		carriots_response = client_carriots.send(data)
+		print('conexion ok!')
+		print(carriots_response.read())
+	else:
+		print('no connectivity available')
+		
+		
+inicializaGPIO()
+
+#MAIN LOOP	
 while 1 == 1:
-	#pantalla de bienvenida
-	GPIO.output(valve_relay, 1)
-	GPIO.output(spritz_relay, 0)
+	
 	if process_id == 0:  #espera monedas
 		ferrosacumulados = 0
 		now_1 = now
@@ -240,10 +262,9 @@ while 1 == 1:
 			now = int(time.time())
 			process_id = 1
 			
-			
 	#acepta monedas
 	elif process_id == 1:
-		secondcycle = 0   #variable que inicializa el p_id #2
+		secondcycle = 0   #variable que inicializa el pid2
 		bytesToRead = ser.inWaiting()
 		if bytesToRead > 0:
 			sleep(0.5)
@@ -251,13 +272,6 @@ while 1 == 1:
 			# print("bytes to read: ", bytesToRead)
 			# string_igua = str(ser.readline(),'utf-8')
 			string_igua = ser.read(2)		
-			# print("bytes read: ", string_igua)
-			# string_igua = string_igua.replace('\n','')
-			# string_igua = string_igua.replace('b\'\\x','')
-			# string_igua = string_igua.replace('\'','')
-			# string_igua = string_igua.replace('b\\n','')
-			# string_igua_2 = int(re.search(r'\d+', string_igua).group())
-			# string_igua = string_igua_2
 			ferros = int(string_igua)
 			ferrosacumulados = ferrosacumulados + ferros
 			solesacumulados = ferrosacumulados / 10.0
@@ -268,13 +282,11 @@ while 1 == 1:
 				display_acumula_pwyw(solesacumulados)
 				lcd_acumula_pwyw(solesacumulados)
 			before = int(time.time()) 
-			# print("before: ", before)
 		
 		#TIMEOUT 
 		now = int(time.time())
-		# print("now: ", now)	
 		diff = now - before
-		# print("diff: ", diff)
+
 		if diff > 10:
 			process_id = 2
 			cuenta_de_ciclos = cuenta_de_ciclos + 1
@@ -288,137 +300,96 @@ while 1 == 1:
 		button_state = GPIO.input(button)
 		if button_state == GPIO.LOW:
 			diff = 0
-			# print ("button is LOW - OR PRESSED")
+			print ("switching to PID2")
 			time.sleep(0.5)	
 			latch = 1
+			servidos_lt = 0
+			precio = 0.5
+			servidos_total = 0
+			counter_al_inicio = 0		           
+			secondcycle = 0
+			set_valve(1) #habilitar valvula
 			process_id = 2
 		else:
 			process_id = 1
 			# print ("button is NOT PRESSED")	
 		
 	
-	# habilita vavula y muestra litros
+	# habilitada vavula y muestra litros
 	elif process_id == 2:
-				           
-		# ser2.write(1)  habilitar valvula
-		GPIO.output(valve_relay, 0)
-		GPIO.output(spritz_relay, 1)
-		
+		print("estoy en el PID2")
 		ser2.flushInput()
-		sleep(.1)
-		servidos_lt = 0
-		precio = 0.5
+		sleep(0.1)
+		hora_actual = int(time.time())
+		hora_de_re_inicio_servida = hora_actual
+						
 		if modo_maquina == 0:
 			litros_servir = 1000 * (solesacumulados / precio) 
 		if modo_maquina == 1:
 			litros_servir = 1000
 		
-	
 		while process_id == 2:
-			
-						
+				
 			bytesToRead = ser2.inWaiting()
-			if bytesToRead > 0:
-				
-				sleep(0.2)
-				bytesToRead = ser2.inWaiting()
-				# print("bytes to read on ser2: ", bytesToRead)
-				string_igua = str(ser2.readline(),'utf-8')
-				# print("received on ser2: ", string_igua)
-				string_igua = string_igua.lstrip('r')		
-				if secondcycle == 0:
-					countstart = int(string_igua)
-					
-				secondcycle = 1  #flag que indica que ya se corrio una vuelta de inicializon
-				
-				# print("bytes striped from ser2: ", string_igua)
-				servidos_total = int(string_igua)
-				servidos_lt = 0.9 * ((servidos_total - countstart) * 2640)/2000
-				diff = 10 - diff
-				display_servidos_lt((litros_servir - servidos_lt),diff)
-				lcd_servidos_lt((litros_servir - servidos_lt),diff)
-				
-			if (servidos_lt - litros_servir) > 0:
-				GPIO.output(valve_relay, 1)
-				GPIO.output(spritz_relay, 0)
-				#send collected data to carriots
-				timestamp = int(mktime(datetime.utcnow().timetuple()))
-				timestamp = int(mktime(datetime.utcnow().timetuple()))
-				solesstring = str(solesacumulados)
-				data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f')}}
-				if is_connected() == True:
-					carriots_response = client_carriots.send(data)
-					print('conexion ok!')
-					print(carriots_response.read())
-				else:
-					print('no connectivity available')
-					
-				#fin bloque carriots 
-				process_id = 3
-					
-			now = int(time.time())
-			# print("before: ", before)
-			# print("now: ", now)	
-			diff = now - before
-			# print("diff: ", diff)
-			if diff > 10:
-				GPIO.output(valve_relay, 1)
-				GPIO.output(spritz_relay, 0)
-				#send collected data to carriots
-				timestamp = int(mktime(datetime.utcnow().timetuple()))
-				solesstring = str(solesacumulados)
-				data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f')}}
-				
-				if is_connected() == True:
-					carriots_response = client_carriots.send(data)
-					print('conexion ok!')
-					print(carriots_response.read())
-				else:
-					print('no esta conectado al internet : ( ')
-				#fin bloque carriots 
-				process_id = 3
-				
+			#verifica timeout
+			hora_actual = int(time.time())
+			tiempo_desde_inicio_servida = hora_actual - hora_de_re_inicio_servida
 			
-			# codigo para direct button:
+			if bytesToRead > 0:  #cada vez que recibe la cuenta desde arduino-flujometro
+				sleep(0.1)       #esperamos a que llegue todo el mensaje 
+				bytesToRead = ser2.inWaiting()
+				print("ahora voy a leer e imprimir lo que recibo.... ")
+				try:
+					string_igua = str(ser2.readline(),'utf-8')
+				except ValueError:
+					print('utf error')
+				string_igua = str(string_igua).lstrip('r')
+				string_igua = str(string_igua).strip('\n\r')
+				string_igua = str(string_igua).strip('\r\n')
+				print('entonces el valor sería: ')
+				print(string_igua)
+				if secondcycle == 0:
+						try:
+							counter_al_inicio = int(string_igua)
+						except ValueError:
+							print('value error')
+							
+				secondcycle = 1  #flag que indica que ya se corrio una vuelta de inicializon			
+				try:
+					servidos_total = int(string_igua)
+				except ValueError:
+					print('string error')
+			
+			if secondcycle == 1:     #a partir de la segunda corrida, muestro la cuenta regresiva
+				servidos_lt = 0.9 * ((servidos_total - counter_al_inicio) * 2640)/2000
+				display_servidos_lt((litros_servir - servidos_lt),10 - tiempo_desde_inicio_servida)
+				lcd_servidos_lt((litros_servir - servidos_lt),10 - tiempo_desde_inicio_servida)
+				print("mande el comando al display")
+				
+			# el boton resetea el tiempo maximo y enciende la válvula
 			button_state = GPIO.input(button)
 			if button_state == GPIO.LOW: 
-				before = int(time.time())
-				now = before
-				diff = 0
-				# print ("button is LOW - OR PRESSED")
+				hora_de_re_inicio_servida = int(time.time())
+				print ("button is LOW - OR PRESSED")
 				time.sleep(0.05)
-				GPIO.output(valve_relay, 0)
-				GPIO.output(spritz_relay, 1)
-								
-			else:
-				time.sleep(0.05)
-				GPIO.output(valve_relay, 1)
-				GPIO.output(spritz_relay, 0)
-			# print ("button is NOT PRESSED")	
-			'''
-			#aca el boton resetea el tiempo
-			if latch == 1:
-				before = int(time.time())
-				now = before
-				diff = 0
-
-			# para detectar flancos se almacena estado previo y se lee 
-			# de nuevo el boton
-			last_buttonstate = button_state
-			button_state = GPIO.input(button)
-			sleep(0.1)
-							
-			#aca se detecta el flanco y se togglea el latch			
-			if ((button_state == GPIO.LOW)&(last_buttonstate == GPIO.HIGH)):
-				sleep(0.5)
-				# print ("button is LOW - OR PRESSED")
-				latch = 1 - latch
-				GPIO.output(relay, (1 - latch))   #imprime el valor de valvula
+				set_valve(1)
 				
-			else:
-				# print ("no se ha detectado flanco")	
-				GPIO.output(relay, (1 - latch))   #imprime el valor de valvula
-			'''	
+			# el boton libre cierra la valvula
+			if button_state == GPIO.HIGH:
+				set_valve(0)
+
+			if (servidos_lt - litros_servir) > 0:  # si se pasa del limite a servir
+				print ("se pasó del volumen a servir")
+				set_valve(0)
+				send_to_carriots()
+				process_id = 3
+					
+			if tiempo_desde_inicio_servida > 10:     #si se demora mucho en re-servir		
+				print ("se acabó el tiempo_desde_inicio_de_servida")
+				set_valve(0)   #cerrando la valvula
+				send_to_carriots()
+				process_id = 3
+				
 					
 
 	# deshabilita vavula y agradece
