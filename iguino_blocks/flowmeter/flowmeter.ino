@@ -29,6 +29,8 @@ volatile byte pulseCount;
 float flowRate;
 unsigned int flowMilliLitres;
 unsigned long totalMilliLitres;
+unsigned long oldTotalMillilitres;
+unsigned long before;
 
 unsigned long oldTime;
 
@@ -49,7 +51,9 @@ void setup()
   flowRate          = 0.0;
   flowMilliLitres   = 0;
   totalMilliLitres  = 0;
+  oldTotalMillilitres = 0;
   oldTime           = 0;
+  before = millis();
 
   // The Hall-effect sensor is connected to pin 2 which uses interrupt 0.
   // Configured to trigger on a FALLING state change (transition from HIGH
@@ -63,7 +67,7 @@ void setup()
 void loop()
 {
    
-   if((millis() - oldTime) > 1000)    // Only process counters once per second
+   if((millis() - oldTime) > 300)    // Only process counters once per second
   { 
     // Disable the interrupt while calculating flow rate and sending the value to
     // the host
@@ -74,7 +78,7 @@ void loop()
     // that to scale the output. We also apply the calibrationFactor to scale the output
     // based on the number of pulses per second per units of measure (litres/minute in
     // this case) coming from the sensor.
-    flowRate = ((1000.0 / (millis() - oldTime)) * pulseCount) / calibrationFactor;
+    flowRate = ((300.0 / (millis() - oldTime)) * pulseCount) / calibrationFactor;
     
     // Note the time this processing pass was executed. Note that because we've
     // disabled interrupts the millis() function won't actually be incrementing right
@@ -88,6 +92,8 @@ void loop()
     flowMilliLitres = (flowRate / 60) * 1000;
     
     // Add the millilitres passed in this second to the cumulative total
+
+    oldTotalMillilitres = totalMilliLitres;
     totalMilliLitres += flowMilliLitres;
       
     unsigned int frac;
@@ -108,7 +114,15 @@ void loop()
     // Print the cumulative total of litres flowed since starting
     // Serial.print("  Output Liquid Quantity: ");             // Output separator
     Serial.println(totalMilliLitres);
-    // Serial.println("mL"); 
+    if (oldTotalMillilitres != totalMilliLitres)
+      {
+      before = millis();
+      }
+    if ((millis() - before) > 20000)
+      {totalMilliLitres = 0;}
+      // Serial.println("mL");
+    
+ 
 
     // Reset the pulse counter so we can start incrementing again
     pulseCount = 0;
