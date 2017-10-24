@@ -113,8 +113,9 @@ void loop()
 
     // Print the cumulative total of litres flowed since starting
     // Serial.print("  Output Liquid Quantity: ");             // Output separator
+    Serial.println(totalMilliLitres);
     if (oldTotalMillilitres != totalMilliLitres)
-      {Serial.println(totalMilliLitres);
+      {
       before = millis();
       }
     if ((millis() - before) > 20000)
