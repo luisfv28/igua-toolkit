@@ -157,33 +157,33 @@ client_carriots = Client(apikey)
 #para lcd
 def lcd_bienvenida_linear(now):
 	if  now == 0:
-		ser3.write('agua pura!      toma igua!!!    '.encode())
+		ser3.write('mAs agua pura...   para Todos!!!'.encode())
 	elif now == 1:
-		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
+		ser3.write('cuida tu salud..y la del planeta'.encode())
 	elif now == 2:
-		ser3.write('chauuuuuuu!!!   hola igua!!!    '.encode())
+		ser3.write('mejor agua y... menos plAstico!!'.encode())
 	elif now == 3:
-		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
+		ser3.write('f/aguaigua      http://igua.pe  '.encode())
 	elif now == 4:
-		ser3.write('chauuuuuuu!!!   hola igua!!!    '.encode())
-	elif now == 5:
 		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
+	elif now == 5:
+		ser3.write('agua igua,      salud!          '.encode())
 	
 	return 1
 
 def lcd_bienvenida_pwyw(now):
 	if  now == 0:
-		ser3.write('agua pura!      toma igua!!!    '.encode())
+		ser3.write('mAs agua pura...   para Todos!!!'.encode())
 	elif now == 1:
-		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
+		ser3.write('cuida tu salud..y la del planeta'.encode())
 	elif now == 2:
-		ser3.write('chauuuuuuu!!!   hola igua!!!    '.encode())
+		ser3.write('mejor agua y... menos plAstico!!'.encode())
 	elif now == 3:
-		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
+		ser3.write('f/aguaigua      http://igua.pe  '.encode())
 	elif now == 4:
-		ser3.write('chauuuuuuu!!!   hola igua!!!    '.encode())
-	elif now == 5:
 		ser3.write('hola mundo!!!   hola igua!!!    '.encode())
+	elif now == 5:
+		ser3.write('agua igua,      salud!          '.encode())
 	
 	return 1
 
@@ -195,7 +195,12 @@ def lcd_acumula_pwyw(solesacumulados):
 	ser3.write(('tu aporte: S/. ' + str(format(solesacumulados, '.2f'))).encode())	
 		
 def lcd_servidos_lt(servidos_lt,diff):
-	ser3.write(('te quedan: ' + str(format(servidos_lt/1000, '.3f')) + ' litros!').encode())	
+	global button
+	button_state = GPIO.input(button)
+	if button_state == GPIO.LOW:
+		ser3.write(('tienes: ' + str(format(servidos_lt/1000, '.3f')) + ' l  ' + '                ' ).encode())	
+	if button_state == GPIO.HIGH:
+		ser3.write(('tienes: ' + str(format(servidos_lt/1000, '.3f')) + ' l  ' + '          ... ' + str(format(diff, '.0f')) + 's').encode())	
 	
 	
 def lcd_agradece():
@@ -215,9 +220,15 @@ def set_valve(valor):
 		
 def set_UV(valor):
 	if valor == 0:
-		GPIO.output(UV_relay, 1)
-	if valor == 1:
 		GPIO.output(UV_relay, 0)
+	if valor == 1:
+		GPIO.output(UV_relay, 1)
+		
+def set_accepting(valor):
+	if valor == 0:
+		GPIO.output(coinhibitor_relay, 1)
+	if valor == 1:
+		GPIO.output(coinhibitor_relay, 0)
 	
 		
 def send_to_carriots():  #send collected data to carriots
@@ -228,6 +239,7 @@ def send_to_carriots():  #send collected data to carriots
 	timestamp = int(mktime(datetime.utcnow().timetuple()))
 	solesstring = str(solesacumulados)
 	data = {"protocol": "v2", "device": device, "at": timestamp, "data": {"colectado soles": solesacumulados, "servido litros": format(servidos_lt/1000, '.3f')}}
+	print(data)
 	if is_connected() == True:
 		carriots_response = client_carriots.send(data)
 		print('conexion ok!')
@@ -242,6 +254,7 @@ inicializaGPIO()
 while 1 == 1:
 	
 	if process_id == 0:  #espera monedas
+		set_accepting(0)
 		ferrosacumulados = 0
 		now_1 = now
 		now = time.time()
@@ -264,6 +277,8 @@ while 1 == 1:
 			
 	#acepta monedas
 	elif process_id == 1:
+		set_UV(0)
+		set_accepting(0)
 		secondcycle = 0   #variable que inicializa el pid2
 		bytesToRead = ser.inWaiting()
 		if bytesToRead > 0:
@@ -317,11 +332,13 @@ while 1 == 1:
 	
 	# habilitada vavula y muestra litros
 	elif process_id == 2:
+		set_accepting(1)
 		print("estoy en el PID2")
 		ser2.flushInput()
 		sleep(0.1)
 		hora_actual = int(time.time())
 		hora_de_re_inicio_servida = hora_actual
+		ser2.flushInput()
 						
 		if modo_maquina == 0:
 			litros_servir = 1000 * (solesacumulados / precio) 
@@ -329,15 +346,18 @@ while 1 == 1:
 			litros_servir = 1000
 		
 		while process_id == 2:
-				
-			bytesToRead = ser2.inWaiting()
+
 			#verifica timeout
 			hora_actual = int(time.time())
 			tiempo_desde_inicio_servida = hora_actual - hora_de_re_inicio_servida
+			bytesToRead = ser2.inWaiting()
 			
+			if bytesToRead > 4:  #cada vez que recibe la cuenta desde arduino-flujometro
+				ser2.flushInput()
+				print('(hemos quemado bytes retrasantes) ')
+				
 			if bytesToRead > 0:  #cada vez que recibe la cuenta desde arduino-flujometro
-				sleep(0.1)       #esperamos a que llegue todo el mensaje 
-				bytesToRead = ser2.inWaiting()
+				sleep(0.1)     #esperamos a que llegue todo el mensaje 
 				print("ahora voy a leer e imprimir lo que recibo.... ")
 				try:
 					string_igua = str(ser2.readline(),'utf-8')
@@ -348,6 +368,7 @@ while 1 == 1:
 				string_igua = str(string_igua).strip('\r\n')
 				print('entonces el valor sería: ')
 				print(string_igua)
+				
 				if secondcycle == 0:
 						try:
 							counter_al_inicio = int(string_igua)
@@ -364,19 +385,20 @@ while 1 == 1:
 				servidos_lt = 0.9 * ((servidos_total - counter_al_inicio) * 2640)/2000
 				display_servidos_lt((litros_servir - servidos_lt),10 - tiempo_desde_inicio_servida)
 				lcd_servidos_lt((litros_servir - servidos_lt),10 - tiempo_desde_inicio_servida)
-				print("mande el comando al display")
+				# print("mande el comando al display")
 				
 			# el boton resetea el tiempo maximo y enciende la válvula
 			button_state = GPIO.input(button)
 			if button_state == GPIO.LOW: 
 				hora_de_re_inicio_servida = int(time.time())
-				print ("button is LOW - OR PRESSED")
-				time.sleep(0.05)
+				# print ("button is LOW - OR PRESSED")
+				# time.sleep(0.05)
 				set_valve(1)
 				
 			# el boton libre cierra la valvula
 			if button_state == GPIO.HIGH:
 				set_valve(0)
+				# print('se solto boton')
 
 			if (servidos_lt - litros_servir) > 0:  # si se pasa del limite a servir
 				print ("se pasó del volumen a servir")
@@ -406,6 +428,7 @@ while 1 == 1:
 			diff = now - before
 			# print("diff: ", diff)
 			if diff > 3:
+				set_UV(1)
 				process_id = 0
 	
 	
