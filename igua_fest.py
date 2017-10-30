@@ -138,9 +138,6 @@ startdisplay()
 #para carriots
 device = "IGUA01@kikomayorga.kikomayorga"  # Replace with the id_developer of your device
 # device = "IGUA_FEST_1@kikomayorga.kikomayorga"
-# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
-# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
-# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
 # device = "IGUA_FEST_CHANCHA@kikomayorga.kikomayorga"
 # device = "IGUA_FEST_DMD@kikomayorga.kikomayorga"  
 apikey = "13f622d642b12cc336fa6bfde36e1561c6ac7eea19bd88d7c32246d0fca45691"  # Replace with your Carriots apikey
@@ -150,9 +147,6 @@ client_carriots = Client(apikey)
 # curl --header carriots.apikey:13f622d642b12cc336fa6bfde36e1561c6ac7eea19bd88d7c32246d0fca45691 http://api.carriots.com/streams/?device=IGUA01@kikomayorga.kikomayorga
 
 #para carriots
-
-
-
 
 #para lcd
 def lcd_bienvenida_linear(now):
@@ -213,7 +207,6 @@ def lcd_ahorradas_bot(ahorradas_bot,diff):
 	
 		
 	# ser3.write(('QWERTYUIASDFGHJKL').encode())    # + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!'))	
-	# msgSurfaceObj = fontObj.render('te quedan: ' + format(servidos_lt/1000, '.3f') + ' litros!', False,whiteColor)
 	# msgSurfaceObj = fontObj.render('te quedan: ' + format(servidos_lt/1000, '.3f') + ' litros!', False,whiteColor)
 	# msgSurfaceObj2 = fontObj2.render('aun tienes: ' + format(diff) + ' segs. ', False,whiteColor)
 
