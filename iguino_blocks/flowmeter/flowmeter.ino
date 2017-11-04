@@ -118,7 +118,7 @@ void loop()
       {
       before = millis();
       }
-    if ((millis() - before) > 20000)
+    if ((millis() - before) > 43200000 ) //     12 horas sin uso?
       {totalMilliLitres = 0;}
       // Serial.println("mL");
     
