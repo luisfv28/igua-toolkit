@@ -350,6 +350,7 @@ while 1 == 1:
 			#verifica timeout
 			hora_actual = int(time.time())
 			tiempo_desde_inicio_servida = hora_actual - hora_de_re_inicio_servida
+			
 			bytesToRead = ser2.inWaiting()
 			
 			if bytesToRead > 4:  #cada vez que recibe la cuenta desde arduino-flujometro
