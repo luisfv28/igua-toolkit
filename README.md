@@ -8,6 +8,7 @@ Done with he support from:
 * Carlos Atahualpa      (3/10)
 * Luis Fuentes
 * Kiko Mayorga
+* Stefanie Delgado
 
 #hola!
 
