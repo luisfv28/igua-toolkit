@@ -1,24 +1,3 @@
-#!/usr/bin/python3 import os
-
-# sleep(15)
-
-# how to set to autostart:
-# lo mismo pero adaptado a raspi: https://www.raspberrypi-spy.co.uk/2014/05/how-to-autostart-apps-in-rasbian-lxde-desktop/
-# lo que funcó para hacer autostart: editamos este file: 
-# sudo nano ~/.config/lxsession/LXDE-pi/autostart
-# y alli adentro ponemos lo sgte: 
-# @sudo /home/pi/Desktop/igua-toolkit/run.sh
-# notar que debes escribilo antes de la linea que dice "screensaver"
-# luego conviene crear un bookmark en el filemanager (pcmanfm) a la carpeta .config/lxsession/LXDE-pi/
-
-# para configurar qué redes queremos aprender u olvidar: 
-# sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
-
-# para clonar la carpeta de github a local:
-# git clone http://github.com/kikomayorga/igua_toolkit/
-
-
-#importando modulos genericos
 from time import sleep
 from time import strftime 
 import time
@@ -27,17 +6,18 @@ import re
 import socket
 REMOTE_SERVER = "www.google.com"
 
-# configuaracion de entradas/saldas del RPI
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-button = 4				# GPIO04, pin nro 07 
+button = 4			# GPIO04, pin nro 07 
 valve_relay = 17		# GPIO17, pin nro 11   
 button2 = 27			# GPIO27, pin nro 13
 spritz_relay = 22		# GPIO22, pin nro 15
-coinhibitor_relay = 23	# GPIO23, pin nro 16
+coinhibitor_relay = 23		# GPIO23, pin nro 16
 UV_relay = 18			# GPIO18, pin nro 12
+
+#Inicio Conexion con Carriots
 
 GPIO.setup(button, GPIO.IN, GPIO.PUD_UP)
 GPIO.setup(button2, GPIO.IN, GPIO.PUD_UP)
@@ -46,7 +26,6 @@ GPIO.setup(spritz_relay, GPIO.OUT)
 GPIO.setup(coinhibitor_relay, GPIO.OUT)
 GPIO.setup(UV_relay, GPIO.OUT)
 
-#para carriots
 from urllib.request import urlopen, Request
 from time import mktime, sleep
 from datetime import datetime
@@ -85,12 +64,7 @@ def rc_time(pipin):
         measurement += 1
 
     return measurement
-    
-    
-#fin para carriots
-
-# declaramos una función que la usaremos mas adelante para 
-# validar conexion disponible
+       
 
 def is_connected():
     try:
@@ -101,60 +75,42 @@ def is_connected():
         pass
     return False
 
-# ser = serial.Serial('/dev/ttyACM1',9600,timeout = 0) #puerto del acceptor 
-ser2 =  serial.Serial('/dev/ttyACM1',9600,timeout = None) #puerto del flujometro es ser2 
+#Final Conexion con Carriots
+
+ser2 =  serial.Serial('/dev/ttyACM1',9600,timeout = None)  
 ser3 =  serial.Serial('/dev/ttyACM0',9600,timeout = None, parity = serial.PARITY_NONE, xonxoff = False, rtscts = False, stopbits = serial.STOPBITS_ONE, bytesize = serial.EIGHTBITS)
 
-#modulos custom
 from igua_display import startdisplay, refreshdisplay 
 from igua_display import display_bienvenida_linear, display_bienvenida_pwyw
 from igua_display import display_acumula_pwyw, display_acumula_linear
 from igua_display import display_servidos_lt, display_agradece 
 
-# import flowmeter
-# import valve
-
-#from display + coinacceptor
-
 last = 0.0
 running = 1
 
 
-solesacumulados = 0   			#transaction-wise accumulator
-ferrosacumulados = 0  			#transaction-wise accumulator
-cuenta_de_ciclos = 0				#transactions counter on eeprom	
+solesacumulados = 0   		#transaction-wise accumulator
+ferrosacumulados = 0  		#transaction-wise accumulator
+cuenta_de_ciclos = 0		#transactions counter on eeprom	
 
 process_id = 0                  #
-modo_maquina = 0  # 1: pay what you want , 0: linear mode
+modo_maquina = 0  		# 1: pay what you want , 0: linear mode
 button_state = 0
 now = 0
 now_1 = 0
 
-#setup
 startdisplay()
-		
-#main loop
 
-#para carriots
-device = "IGUA01@kikomayorga.kikomayorga"  # Replace with the id_developer of your device
-# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
-# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
-# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
-# device = "IGUA_FEST_1@kikomayorga.kikomayorga"
-# device = "IGUA_FEST_CHANCHA@kikomayorga.kikomayorga"
-# device = "IGUA_FEST_DMD@kikomayorga.kikomayorga"  
-apikey = "13f622d642b12cc336fa6bfde36e1561c6ac7eea19bd88d7c32246d0fca45691"  # Replace with your Carriots apikey
+device = "IGUA01@kikomayorga.kikomayorga"  
+apikey = "13f622d642b12cc336fa6bfde36e1561c6ac7eea19bd88d7c32246d0fca45691"  
 client_carriots = Client(apikey)
 
 # ejemplo de curl "para traer todos los ulktimos streams"
-# curl --header carriots.apikey:13f622d642b12cc336fa6bfde36e1561c6ac7eea19bd88d7c32246d0fca45691 http://api.carriots.com/streams/?device=IGUA01@kikomayorga.kikomayorga
+# curl --header carriots.apikey:13f622d642b12cc336fa6bfde36e1561c6ac7eea19bd88d7c32246d0fca45691 
+#               http://api.carriots.com/streams/?device=IGUA01@kikomayorga.kikomayorga
 
-#para carriots
+#Inicio Definiciones de Pantalla
 
-
-
-
-#para lcd
 def lcd_bienvenida_linear(now):
 	if  now == 0:
 		ser3.write('agua pura!      toma igua!!!    '.encode())
@@ -188,38 +144,23 @@ def lcd_bienvenida_pwyw(now):
 	return 1
 
 def lcd_acumula_linear(solesacumulados):
-	# ser3.write('hola mundo!!!      hola igua!!! '.encode())	
 	ser3.write(('tu saldo: S/. ' + str(format(solesacumulados, '.2f'))).encode())
-	# msgSurfaceObj = fontObj.render('tu saldo: S/. ' + format(solesacumulados, '.2f'), False,whiteColor)
-	# msgSurfaceObj2 = fontObj2.render('deposita o sirvete ' + format(solesacumulados / 0.5, '.2f') + ' litros.', False,whiteColor)
 	return 1
 	
 def lcd_acumula_pwyw(solesacumulados):
-	# ser3.write('hola mundo!!!      hola igua!!! '.encode())	
-	# msgSurfaceObj = fontObj.render('tu aporte: S/. ' + format(solesacumulados, '.2f'), False,whiteColor)
 	ser3.write(('tu aporte: S/. ' + str(format(solesacumulados, '.2f'))).encode())	
-	# msgSurfaceObj2 = fontObj2.render('deposita mas o sirvete! ', False,whiteColor)	
 
 	
 def lcd_servidos_lt(servidos_lt,diff):
-	# ser3.write(('mAs agua pura!  mAs agua pura!  ' + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!').encode())	
-	# ser3.write(('mAs agua pura!  mAs agua pura!  ').encode())    # + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!'))	
 	ser3.write(('  + ' + str(format(servidos_lt/1000, '.3f')) + ' litros! ').encode())	
 
 def lcd_ahorradas_bot(ahorradas_bot,diff):
-	# ser3.write(('mAs agua pura!  mAs agua pura!  ' + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!').encode())	
-	# ser3.write(('mAs agua pura!  mAs agua pura!  ').encode())    # + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!'))	
 	ser3.write(('  - ' + str(format(ahorradas_bot/1000, '.0f')) + ' botellas! ').encode())	
-	
-		
-	# ser3.write(('QWERTYUIASDFGHJKL').encode())    # + ' + ' + str(format(servidos_lt/1000, '.3f')) + ' litros!'))	
-	# msgSurfaceObj = fontObj.render('te quedan: ' + format(servidos_lt/1000, '.3f') + ' litros!', False,whiteColor)
-	# msgSurfaceObj = fontObj.render('te quedan: ' + format(servidos_lt/1000, '.3f') + ' litros!', False,whiteColor)
-	# msgSurfaceObj2 = fontObj2.render('aun tienes: ' + format(diff) + ' segs. ', False,whiteColor)
-
 	
 def lcd_agradece():
 	ser3.write('gracias!!!! igua ague pe ! '.encode())	
+
+#Fin Definiciones de Pantalla
 
 
 servidos_lt = 0
@@ -228,8 +169,8 @@ servidos_litros_older = 0
 loopcounter = 0	
 servidos_total_old = 0
 		
-#para lcd
-	
+#Inicio Procesos de Servir Agua
+
 while 1 == 1:
 	#pantalla de bienvenida
 	
@@ -238,24 +179,15 @@ while 1 == 1:
 	now = int((now/2)%6)
 	if now != now_1:
 		if modo_maquina == 0:
-			# display_bienvenida_linear(now)
-			# lcd_bienvenida_linear(now)
 			nada = 0
 		if modo_maquina == 1:
-			# display_bienvenida_pwyw(now)
-			# lcd_bienvenida_pwyw(now)  # cuidado CUIDADO!!!!
 			nada = 0
 	
-    #leer aceptador de monedas
 	before = int(time.time())
 		
 	if modo_maquina == 0:
-		#display_acumula_linear(solesacumulados)
-		#lcd_acumula_linear(solesacumulados)
 		nada = 0
 	if modo_maquina == 1:
-		#display_acumula_pwyw(solesacumulados)
-		#lcd_acumula_pwyw(solesacumulados)
 		nada = 0
 		
 	
@@ -284,8 +216,7 @@ while 1 == 1:
 			except ValueError:
 				print('error')
 							
-			secondcycle = 1  #flag que indica que ya se corrio una vuelta de inicializon
-			# print("bytes striped from ser2: ", string_igua)
+			secondcycle = 1  
 			servidos_total = int(string_igua)
 			servidos_litros_older = servidos_lt_old
 			servidos_lt_old = servidos_lt
@@ -315,6 +246,7 @@ while 1 == 1:
 				else:
 					print('no connectivity available')
 
+#Fin Procesos de Servir Agua
 			# print("una vuelta mas")
 					
 
